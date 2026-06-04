@@ -1,0 +1,352 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserType {
+  STAFF
+  CUSTOMER
+}
+
+enum StaffPermissionKey {
+  MANAGE_CUSTOMERS
+  MANAGE_QUOTES
+  MANAGE_SHIPMENTS
+  MANAGE_CARRIERS
+  MANAGE_DOCUMENTS
+  MANAGE_INVOICES
+  MANAGE_STAFF_SETTINGS
+  VIEW_BUY_RATES
+  VIEW_SELL_RATES
+  VIEW_MARGINS
+  VIEW_REPORTS
+}
+
+enum ServiceType {
+  PARCEL
+  LTL
+  FULL_TRUCKLOAD
+  INTERMODAL
+  CARTAGE
+  AIR
+  OCEAN
+  EXPEDITED
+  WAREHOUSING
+}
+
+enum QuoteStatus {
+  DRAFT
+  REQUESTED
+  IN_REVIEW
+  QUOTED
+  ACCEPTED
+  DECLINED
+  CONVERTED
+  CANCELLED
+}
+
+enum ShipmentStatus {
+  DRAFT
+  BOOKED
+  DISPATCHED
+  PICKED_UP
+  IN_TRANSIT
+  OUT_FOR_DELIVERY
+  DELIVERED
+  CANCELLED
+  EXCEPTION
+}
+
+enum DocumentType {
+  BOL
+  POD
+  INVOICE
+  RATE_CONFIRMATION
+  CUSTOMER_DOCUMENT
+  CARRIER_DOCUMENT
+  OTHER
+}
+
+enum ActivityAction {
+  CREATED
+  UPDATED
+  DELETED
+  ASSIGNED
+  STATUS_CHANGED
+  PRICE_CHANGED
+  DOCUMENT_UPLOADED
+  API_RATE_RECEIVED
+  API_DISPATCHED
+  API_TRACKING_UPDATED
+  API_ALERT_RECEIVED
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  firstName    String
+  lastName     String
+  userType     UserType @default(CUSTOMER)
+  isActive     Boolean  @default(true)
+
+  customerId String?
+  customer   Customer? @relation(fields: [customerId], references: [id])
+
+  staffPermissions StaffPermission[]
+
+  createdQuotes    Quote[]    @relation("QuoteCreatedBy")
+  requestedQuotes  Quote[]    @relation("QuoteRequestedBy")
+  assignedQuotes   Quote[]    @relation("QuoteAssignedTo")
+
+  createdShipments  Shipment[] @relation("ShipmentCreatedBy")
+  assignedShipments Shipment[] @relation("ShipmentAssignedTo")
+
+  documents    Document[]    @relation("DocumentUploadedBy")
+  activityLogs ActivityLog[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model StaffPermission {
+  id      String             @id @default(cuid())
+  userId  String
+  key     StaffPermissionKey
+  enabled Boolean            @default(true)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, key])
+}
+
+model Customer {
+  id       String  @id @default(cuid())
+  name     String
+  phone    String?
+  email    String?
+  website  String?
+  isActive Boolean @default(true)
+
+  physicalAddress String?
+  physicalCity    String?
+  physicalState   String?
+  physicalZip     String?
+  physicalCountry String? @default("US")
+
+  billingName    String?
+  billingEmail   String?
+  billingAddress String?
+  billingCity    String?
+  billingState   String?
+  billingZip     String?
+  billingCountry String? @default("US")
+
+  users        User[]
+  quotes       Quote[]
+  shipments    Shipment[]
+  documents    Document[]
+  activityLogs ActivityLog[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Carrier {
+  id        String  @id @default(cuid())
+  name      String
+  scac      String?
+  mcNumber  String?
+  dotNumber String?
+  phone     String?
+  email     String?
+  website   String?
+  isActive  Boolean @default(true)
+
+  shipments Shipment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Quote {
+  id          String      @id @default(cuid())
+  quoteNumber String      @unique
+  serviceType ServiceType
+  status      QuoteStatus @default(REQUESTED)
+
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id])
+
+  requestedById String?
+  requestedBy   User? @relation("QuoteRequestedBy", fields: [requestedById], references: [id])
+
+  createdById String?
+  createdBy   User? @relation("QuoteCreatedBy", fields: [createdById], references: [id])
+
+  assignedToId String?
+  assignedTo   User? @relation("QuoteAssignedTo", fields: [assignedToId], references: [id])
+
+  originName    String?
+  originAddress String?
+  originCity    String?
+  originState   String?
+  originZip     String?
+  originCountry String? @default("US")
+
+  destinationName    String?
+  destinationAddress String?
+  destinationCity    String?
+  destinationState   String?
+  destinationZip     String?
+  destinationCountry String? @default("US")
+
+  pieces       Int?
+  pallets      Int?
+  weightLbs    Decimal?
+  lengthIn     Decimal?
+  widthIn      Decimal?
+  heightIn     Decimal?
+  freightClass String?
+  description  String?
+
+  quotedAmount Decimal?
+  sellRate     Decimal?
+  buyRate      Decimal?
+  margin       Decimal?
+
+  notes String?
+
+  shipment     Shipment?
+  activityLogs ActivityLog[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Shipment {
+  id             String         @id @default(cuid())
+  shipmentNumber String         @unique
+  serviceType    ServiceType
+  status         ShipmentStatus @default(BOOKED)
+
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id])
+
+  carrierId String?
+  carrier   Carrier? @relation(fields: [carrierId], references: [id])
+
+  quoteId String? @unique
+  quote   Quote?  @relation(fields: [quoteId], references: [id])
+
+  createdById String?
+  createdBy   User? @relation("ShipmentCreatedBy", fields: [createdById], references: [id])
+
+  assignedToId String?
+  assignedTo   User? @relation("ShipmentAssignedTo", fields: [assignedToId], references: [id])
+
+  pickupDate     DateTime?
+  deliveryDate   DateTime?
+  actualPickup   DateTime?
+  actualDelivery DateTime?
+
+  proNumber       String?
+  bolNumber       String?
+  poNumber        String?
+  trackingNumber  String?
+  containerNumber String?
+
+  originName    String?
+  originAddress String?
+  originCity    String?
+  originState   String?
+  originZip     String?
+  originCountry String? @default("US")
+
+  destinationName    String?
+  destinationAddress String?
+  destinationCity    String?
+  destinationState   String?
+  destinationZip     String?
+  destinationCountry String? @default("US")
+
+  pieces       Int?
+  pallets      Int?
+  weightLbs    Decimal?
+  freightClass String?
+  description  String?
+
+  sellRate Decimal?
+  buyRate  Decimal?
+  margin   Decimal?
+
+  notes String?
+
+  trackingEvents TrackingEvent[]
+  documents      Document[]
+  activityLogs   ActivityLog[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model TrackingEvent {
+  id         String    @id @default(cuid())
+  shipmentId String
+  shipment   Shipment @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
+
+  status      ShipmentStatus
+  location    String?
+  description String?
+  eventTime   DateTime       @default(now())
+
+  createdAt DateTime @default(now())
+}
+
+model Document {
+  id       String       @id @default(cuid())
+  type     DocumentType
+  fileName String
+  fileUrl  String
+  notes    String?
+
+  customerId String?
+  customer   Customer? @relation(fields: [customerId], references: [id])
+
+  shipmentId String?
+  shipment   Shipment? @relation(fields: [shipmentId], references: [id])
+
+  uploadedById String?
+  uploadedBy   User? @relation("DocumentUploadedBy", fields: [uploadedById], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ActivityLog {
+  id       String         @id @default(cuid())
+  action   ActivityAction
+  message  String
+  metadata Json?
+
+  userId String?
+  user   User? @relation(fields: [userId], references: [id])
+
+  quoteId String?
+  quote   Quote? @relation(fields: [quoteId], references: [id])
+
+  shipmentId String?
+  shipment   Shipment? @relation(fields: [shipmentId], references: [id])
+
+  customerId String?
+  customer   Customer? @relation(fields: [customerId], references: [id])
+
+  createdAt DateTime @default(now())
+}
