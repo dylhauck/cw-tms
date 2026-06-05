@@ -9,53 +9,59 @@ export default function CancelShipmentForm({
 }) {
   const [isOpen, setIsOpen] = useState(false);
 
-  if (!isOpen) {
-    return (
+  return (
+    <>
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className="rounded-xl bg-red-600 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-red-700"
+        style={{ backgroundColor: "#dc2626", color: "white" }}
+        className="rounded-xl px-5 py-3 text-sm font-bold shadow-sm transition hover:opacity-90"
       >
         Cancel Shipment
       </button>
-    );
-  }
 
-  return (
-    <form
-      action={action}
-      className="rounded-2xl border border-red-200 bg-red-50 p-5 shadow-sm"
-    >
-      <h2 className="text-lg font-bold text-red-900">Cancel Shipment</h2>
+      {isOpen ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-4 backdrop-blur-sm">
+          <form
+            action={action}
+            className="w-full max-w-lg rounded-2xl border border-red-200 bg-white p-6 shadow-2xl"
+          >
+            <h2 className="text-xl font-bold text-red-700">
+              Cancel Shipment
+            </h2>
 
-      <p className="mt-2 text-sm leading-6 text-red-800">
-        Please enter the reason this shipment is being cancelled.
-      </p>
+            <p className="mt-2 text-sm leading-6 text-[#5F6B66]">
+              Please enter the reason this shipment is being cancelled.
+            </p>
 
-      <textarea
-        name="cancellationReason"
-        required
-        rows={4}
-        className="mt-4 w-full rounded-xl border border-red-200 bg-white px-4 py-3 text-sm outline-none focus:border-red-500"
-        placeholder="Enter cancellation reason..."
-      />
+            <textarea
+              name="cancellationReason"
+              required
+              rows={4}
+              className="mt-4 w-full rounded-xl border border-red-200 bg-white px-4 py-3 text-sm outline-none focus:border-red-500"
+              placeholder="Enter cancellation reason..."
+            />
 
-      <div className="mt-4 flex justify-end gap-3">
-        <button
-          type="button"
-          onClick={() => setIsOpen(false)}
-          className="rounded-xl border border-red-200 bg-white px-5 py-3 text-sm font-bold text-red-700"
-        >
-          Keep Shipment
-        </button>
+            <div className="mt-5 flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setIsOpen(false)}
+                className="rounded-xl border border-[#D8DCD8] bg-white px-5 py-3 text-sm font-bold text-[#111111]"
+              >
+                Keep Shipment
+              </button>
 
-        <button
-          type="submit"
-          className="rounded-xl bg-red-600 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-red-700"
-        >
-          Confirm Cancel
-        </button>
-      </div>
-    </form>
+              <button
+                type="submit"
+                style={{ backgroundColor: "#dc2626", color: "white" }}
+                className="rounded-xl px-5 py-3 text-sm font-bold shadow-sm transition hover:opacity-90"
+              >
+                Confirm Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      ) : null}
+    </>
   );
 }

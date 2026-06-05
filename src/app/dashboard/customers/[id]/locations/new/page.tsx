@@ -3,6 +3,46 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { createCustomerLocation } from "../../../actions";
 
+const countries = [
+  { value: "US", label: "United States" },
+  { value: "CA", label: "Canada" },
+  { value: "MX", label: "Mexico" },
+  { value: "GB", label: "United Kingdom" },
+  { value: "IE", label: "Ireland" },
+  { value: "DE", label: "Germany" },
+  { value: "FR", label: "France" },
+  { value: "ES", label: "Spain" },
+  { value: "IT", label: "Italy" },
+  { value: "NL", label: "Netherlands" },
+  { value: "BE", label: "Belgium" },
+  { value: "CH", label: "Switzerland" },
+  { value: "AT", label: "Austria" },
+  { value: "PL", label: "Poland" },
+  { value: "SE", label: "Sweden" },
+  { value: "NO", label: "Norway" },
+  { value: "DK", label: "Denmark" },
+  { value: "FI", label: "Finland" },
+  { value: "AU", label: "Australia" },
+  { value: "NZ", label: "New Zealand" },
+  { value: "CN", label: "China" },
+  { value: "JP", label: "Japan" },
+  { value: "KR", label: "South Korea" },
+  { value: "TW", label: "Taiwan" },
+  { value: "HK", label: "Hong Kong" },
+  { value: "SG", label: "Singapore" },
+  { value: "IN", label: "India" },
+  { value: "VN", label: "Vietnam" },
+  { value: "TH", label: "Thailand" },
+  { value: "MY", label: "Malaysia" },
+  { value: "BR", label: "Brazil" },
+  { value: "AR", label: "Argentina" },
+  { value: "CL", label: "Chile" },
+  { value: "CO", label: "Colombia" },
+  { value: "AE", label: "United Arab Emirates" },
+  { value: "SA", label: "Saudi Arabia" },
+  { value: "ZA", label: "South Africa" },
+];
+
 export default async function NewCustomerLocationPage({
   params,
 }: {
@@ -58,6 +98,12 @@ export default async function NewCustomerLocationPage({
             className="rounded-xl border border-[#D8DCD8] px-4 py-3"
           />
 
+          <input
+            name="address2"
+            placeholder="Street Address (Cont.), example: Dock 4, Suite 200, Building B"
+            className="rounded-xl border border-[#D8DCD8] px-4 py-3"
+          />
+
           <div className="grid gap-6 md:grid-cols-4">
             <input
               name="city"
@@ -69,19 +115,34 @@ export default async function NewCustomerLocationPage({
             <input
               name="state"
               required
-              placeholder="State"
+              placeholder="State / Province"
               className="rounded-xl border border-[#D8DCD8] px-4 py-3"
             />
 
             <input
               name="zip"
               required
-              placeholder="ZIP"
+              placeholder="ZIP / Postal Code"
               className="rounded-xl border border-[#D8DCD8] px-4 py-3"
             />
           </div>
 
-          <input name="country" type="hidden" value="US" />
+          <div>
+            <label className="block text-sm font-bold text-[#111111]">
+              Country
+            </label>
+            <select
+              name="country"
+              defaultValue="US"
+              className="mt-2 w-full rounded-xl border border-[#D8DCD8] px-4 py-3"
+            >
+              {countries.map((country) => (
+                <option key={country.value} value={country.value}>
+                  {country.label}
+                </option>
+              ))}
+            </select>
+          </div>
 
           <div className="border-t border-[#D8DCD8] pt-6">
             <h2 className="text-xl font-bold text-[#111111]">

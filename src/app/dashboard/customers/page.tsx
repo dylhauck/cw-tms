@@ -82,7 +82,7 @@ export default async function CustomersPage() {
             </p>
           </div>
 
-          <div className="divide-y divide-[#D8DCD8]">
+          <div className="space-y-3 p-3">
             {customers.map((customer) => {
               const addressParts = [
                 customer.physicalAddress,
@@ -95,8 +95,8 @@ export default async function CustomersPage() {
                 <Link
                   key={customer.id}
                   href={`/dashboard/customers/${customer.id}`}
-                  className="block px-6 py-5 transition hover:bg-[#F6F8F6]"
-                >
+                  className="block rounded-xl border border-[#D8DCD8] bg-white px-6 py-5 transition hover:border-[#0F6B31] hover:bg-[#F6F8F6]"
+                  >
                   <div className="flex items-start justify-between gap-6">
                     <div>
                       <div className="flex items-center gap-3">
@@ -136,7 +136,7 @@ export default async function CustomersPage() {
                       </div>
                     </div>
 
-                    <div className="grid min-w-[380px] grid-cols-4 gap-3 text-center">
+                    <div className="flex shrink-0 items-center gap-3 text-center">
                       <div className="flex min-h-[74px] flex-col items-center justify-center rounded-xl border border-[#D8DCD8] bg-[#F6F8F6] px-4 py-3">
                         <p className="text-lg font-bold text-[#0F6B31]">
                           {customer.users.length}

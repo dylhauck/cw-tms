@@ -39,20 +39,30 @@ enum ServiceType {
 }
 
 enum PieceType {
+  BAGS
+  BASKETS
+  BINS
   BOXES
-  PAILS
-  DRUMS
-  JERRYCANS
+  BUNDLES
+  CANS
+  CARTS
   CARTONS
   CASES
-  UNITS
-  BUNDLES
-  BASKETS
-  TOTES
-  PALLETS
+  CONTAINERS
   CRATES
-  ROLLS
+  DRUMS
+  GAYLORDS
+  JERRYCANS
+  LOOSE
   OTHER
+  PACKAGES
+  PAILS
+  PALLETS
+  PIECES
+  ROLLS
+  TOTES
+  UNITS
+  VEHICLES
 }
 
 enum QuoteStatus {
@@ -155,19 +165,21 @@ model Customer {
   website  String?
   isActive Boolean @default(true)
 
-  physicalAddress String?
-  physicalCity    String?
-  physicalState   String?
-  physicalZip     String?
-  physicalCountry String? @default("US")
+  physicalAddress  String?
+  physicalAddress2 String?
+  physicalCity     String?
+  physicalState    String?
+  physicalZip      String?
+  physicalCountry  String? @default("US")
 
-  billingName    String?
-  billingEmail   String?
-  billingAddress String?
-  billingCity    String?
-  billingState   String?
-  billingZip     String?
-  billingCountry String? @default("US")
+  billingName     String?
+  billingEmail    String?
+  billingAddress  String?
+  billingAddress2 String?
+  billingCity     String?
+  billingState    String?
+  billingZip      String?
+  billingCountry  String? @default("US")
 
   users        User[]
   quotes       Quote[]
@@ -190,11 +202,12 @@ model CustomerLocation {
   nickname    String?
   companyName String?
 
-  address String
-  city    String
-  state   String
-  zip     String
-  country String @default("US")
+  address  String
+  address2 String?
+  city     String
+  state    String
+  zip      String
+  country  String @default("US")
 
   contactName  String?
   contactPhone String?
@@ -265,19 +278,21 @@ model Quote {
   assignedToId String?
   assignedTo   User? @relation("QuoteAssignedTo", fields: [assignedToId], references: [id])
 
-  originName    String?
-  originAddress String?
-  originCity    String?
-  originState   String?
-  originZip     String?
-  originCountry String? @default("US")
+  originName     String?
+  originAddress  String?
+  originAddress2 String?
+  originCity     String?
+  originState    String?
+  originZip      String?
+  originCountry  String? @default("US")
 
-  destinationName    String?
-  destinationAddress String?
-  destinationCity    String?
-  destinationState   String?
-  destinationZip     String?
-  destinationCountry String? @default("US")
+  destinationName     String?
+  destinationAddress  String?
+  destinationAddress2 String?
+  destinationCity     String?
+  destinationState    String?
+  destinationZip      String?
+  destinationCountry  String? @default("US")
 
   pieces       Int?
   pieceType    PieceType?
@@ -338,19 +353,21 @@ model Shipment {
   trackingNumber  String?
   containerNumber String?
 
-  originName    String?
-  originAddress String?
-  originCity    String?
-  originState   String?
-  originZip     String?
-  originCountry String? @default("US")
+  originName     String?
+  originAddress  String?
+  originAddress2 String?
+  originCity     String?
+  originState    String?
+  originZip      String?
+  originCountry  String? @default("US")
 
-  destinationName    String?
-  destinationAddress String?
-  destinationCity    String?
-  destinationState   String?
-  destinationZip     String?
-  destinationCountry String? @default("US")
+  destinationName     String?
+  destinationAddress  String?
+  destinationAddress2 String?
+  destinationCity     String?
+  destinationState    String?
+  destinationZip      String?
+  destinationCountry  String? @default("US")
 
   pieces       Int?
   pieceType    PieceType?

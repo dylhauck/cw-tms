@@ -25,6 +25,7 @@ function formatMoney(value: unknown) {
 function formatAddress({
   name,
   address,
+  address2,
   city,
   state,
   zip,
@@ -32,13 +33,17 @@ function formatAddress({
 }: {
   name?: string | null;
   address?: string | null;
+  address2?: string | null;
   city?: string | null;
   state?: string | null;
   zip?: string | null;
   country?: string | null;
 }) {
   const cityStateZip = [city, state, zip].filter(Boolean).join(", ");
-  return [name, address, cityStateZip, country].filter(Boolean).join("\n");
+
+  return [name, address, address2, cityStateZip, country]
+    .filter(Boolean)
+    .join("\n");
 }
 
 function AddressCard({
@@ -113,17 +118,19 @@ export default async function QuoteDetailPage({
   const updateQuoteStatusWithId = updateQuoteStatus.bind(null, quote.id);
 
   const originAddress = formatAddress({
-    name: quote.originName,
-    address: quote.originAddress,
-    city: quote.originCity,
-    state: quote.originState,
-    zip: quote.originZip,
-    country: quote.originCountry,
-  });
+  name: quote.originName,
+  address: quote.originAddress,
+  address2: quote.originAddress2,
+  city: quote.originCity,
+  state: quote.originState,
+  zip: quote.originZip,
+  country: quote.originCountry,
+});
 
   const destinationAddress = formatAddress({
     name: quote.destinationName,
     address: quote.destinationAddress,
+    address2: quote.destinationAddress2,
     city: quote.destinationCity,
     state: quote.destinationState,
     zip: quote.destinationZip,

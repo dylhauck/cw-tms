@@ -26,6 +26,7 @@ function formatMoney(value: unknown) {
 function formatAddress({
   name,
   address,
+  address2,
   city,
   state,
   zip,
@@ -33,13 +34,14 @@ function formatAddress({
 }: {
   name?: string | null;
   address?: string | null;
+  address2?: string | null;
   city?: string | null;
   state?: string | null;
   zip?: string | null;
   country?: string | null;
 }) {
   const cityStateZip = [city, state, zip].filter(Boolean).join(", ");
-  return [name, address, cityStateZip, country].filter(Boolean).join("\n");
+  return [name, address, address2, cityStateZip, country].filter(Boolean).join("\n");
 }
 
 function AddressCard({ title, address }: { title: string; address: string }) {
@@ -163,6 +165,7 @@ export default async function ShipmentDetailPage({
   const originAddress = formatAddress({
     name: shipment.originName,
     address: shipment.originAddress,
+    address2: shipment.originAddress2,
     city: shipment.originCity,
     state: shipment.originState,
     zip: shipment.originZip,
@@ -172,6 +175,7 @@ export default async function ShipmentDetailPage({
   const destinationAddress = formatAddress({
     name: shipment.destinationName,
     address: shipment.destinationAddress,
+    address2: shipment.destinationAddress2,
     city: shipment.destinationCity,
     state: shipment.destinationState,
     zip: shipment.destinationZip,
@@ -203,7 +207,7 @@ export default async function ShipmentDetailPage({
           </p>
         </div>
 
-        <div className="flex shrink-0 items-start gap-3">
+        <div className="relative z-20 flex shrink-0 items-center gap-3 self-start">
           {shipment.quote ? (
             <Link
               href={`/dashboard/quotes/${shipment.quote.id}/edit`}

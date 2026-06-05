@@ -77,6 +77,7 @@ export async function createQuote(formData: FormData) {
 
       originName: cleanValue(formData.get("originName")),
       originAddress: cleanValue(formData.get("originAddress")),
+      originAddress2: cleanValue(formData.get("originAddress2")),
       originCity: cleanValue(formData.get("originCity")),
       originState: cleanValue(formData.get("originState")),
       originZip: cleanValue(formData.get("originZip")),
@@ -84,6 +85,7 @@ export async function createQuote(formData: FormData) {
 
       destinationName: cleanValue(formData.get("destinationName")),
       destinationAddress: cleanValue(formData.get("destinationAddress")),
+      destinationAddress2: cleanValue(formData.get("destinationAddress2")),
       destinationCity: cleanValue(formData.get("destinationCity")),
       destinationState: cleanValue(formData.get("destinationState")),
       destinationZip: cleanValue(formData.get("destinationZip")),
@@ -103,6 +105,9 @@ export async function createQuote(formData: FormData) {
       heightIn: cleanDecimal(formData.get("heightIn")),
       freightClass: cleanValue(formData.get("freightClass")),
       nmfc: cleanValue(formData.get("nmfc")),
+      miles: cleanValue(formData.get("miles"))
+        ? Number(cleanValue(formData.get("miles")))
+        : null,
       description: cleanValue(formData.get("description")),
 
       sellRate,
@@ -153,6 +158,7 @@ export async function updateQuote(quoteId: string, formData: FormData) {
 
       originName: cleanValue(formData.get("originName")),
       originAddress: cleanValue(formData.get("originAddress")),
+      originAddress2: cleanValue(formData.get("originAddress2")),
       originCity: cleanValue(formData.get("originCity")),
       originState: cleanValue(formData.get("originState")),
       originZip: cleanValue(formData.get("originZip")),
@@ -160,6 +166,7 @@ export async function updateQuote(quoteId: string, formData: FormData) {
 
       destinationName: cleanValue(formData.get("destinationName")),
       destinationAddress: cleanValue(formData.get("destinationAddress")),
+      destinationAddress2: cleanValue(formData.get("destinationAddress2")),
       destinationCity: cleanValue(formData.get("destinationCity")),
       destinationState: cleanValue(formData.get("destinationState")),
       destinationZip: cleanValue(formData.get("destinationZip")),
@@ -179,6 +186,9 @@ export async function updateQuote(quoteId: string, formData: FormData) {
       heightIn: cleanDecimal(formData.get("heightIn")),
       freightClass: cleanValue(formData.get("freightClass")),
       nmfc: cleanValue(formData.get("nmfc")),
+      miles: cleanValue(formData.get("miles"))
+        ? Number(cleanValue(formData.get("miles")))
+        : null,
       description: cleanValue(formData.get("description")),
 
       sellRate,
@@ -236,6 +246,7 @@ export async function convertQuoteToShipment(quoteId: string) {
 
         originName: quote.originName,
         originAddress: quote.originAddress,
+        originAddress2: quote.originAddress2,
         originCity: quote.originCity,
         originState: quote.originState,
         originZip: quote.originZip,
@@ -243,6 +254,7 @@ export async function convertQuoteToShipment(quoteId: string) {
 
         destinationName: quote.destinationName,
         destinationAddress: quote.destinationAddress,
+        destinationAddress2: quote.destinationAddress2,
         destinationCity: quote.destinationCity,
         destinationState: quote.destinationState,
         destinationZip: quote.destinationZip,
@@ -344,6 +356,7 @@ export async function updateQuoteStatus(quoteId: string, formData: FormData) {
 
           originName: quote.originName,
           originAddress: quote.originAddress,
+          originAddress2: quote.originAddress2,
           originCity: quote.originCity,
           originState: quote.originState,
           originZip: quote.originZip,
@@ -351,6 +364,7 @@ export async function updateQuoteStatus(quoteId: string, formData: FormData) {
 
           destinationName: quote.destinationName,
           destinationAddress: quote.destinationAddress,
+          destinationAddress2: quote.destinationAddress2,
           destinationCity: quote.destinationCity,
           destinationState: quote.destinationState,
           destinationZip: quote.destinationZip,
