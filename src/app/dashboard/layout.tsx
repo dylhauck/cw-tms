@@ -1,4 +1,5 @@
 import Image from "next/image";
+import DashboardNav from "@/components/DashboardNav";
 import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
@@ -40,7 +41,7 @@ export default async function DashboardLayout({
 
   return (
     <div className="min-h-screen bg-[#F6F8F6] text-[#111111]">
-      <div className="fixed left-0 top-0 z-30 flex h-24 w-72 items-center border-b border-r border-[#D8DCD8] bg-white px-6">
+      <div className="fixed left-0 top-0 z-30 flex h-24 w-64 items-center border-b border-r border-[#D8DCD8] bg-white px-6">
         <Image
           src="/cw-logo.png"
           alt="CW Worldwide logo"
@@ -58,28 +59,9 @@ export default async function DashboardLayout({
         </div>
       </div>
 
-      <aside className="fixed bottom-0 left-0 top-24 z-20 w-72 bg-[#0F6B31] text-white">
-        <nav className="space-y-2 px-5 py-7">
-          {navigation.map((item, index) => {
-            const Icon = item.icon;
-
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`flex items-center gap-3 rounded-xl px-4 py-3 text-base font-semibold transition ${
-                  index === 0
-                    ? "bg-white/15 text-white"
-                    : "text-white/95 hover:bg-white/10"
-                }`}
-              >
-                <Icon size={20} />
-                {item.name}
-              </Link>
-            );
-          })}
-        </nav>
-      </aside>
+      <aside className="fixed bottom-0 left-0 top-24 z-20 w-64 bg-[#0F6B31] text-white">
+  <DashboardNav />
+</aside>
 
       <div className="pl-72">
         <header className="sticky top-0 z-20 flex h-24 items-center justify-between border-b border-[#D8DCD8] bg-white px-8 shadow-sm">

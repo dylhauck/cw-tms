@@ -38,6 +38,23 @@ enum ServiceType {
   WAREHOUSING
 }
 
+enum PieceType {
+  BOXES
+  PAILS
+  DRUMS
+  JERRYCANS
+  CARTONS
+  CASES
+  UNITS
+  BUNDLES
+  BASKETS
+  TOTES
+  PALLETS
+  CRATES
+  ROLLS
+  OTHER
+}
+
 enum QuoteStatus {
   DRAFT
   REQUESTED
@@ -91,6 +108,9 @@ model User {
   passwordHash String
   firstName    String
   lastName     String
+  title        String?
+  mobilePhone  String?
+  officePhone  String?
   userType     UserType @default(CUSTOMER)
   isActive     Boolean  @default(true)
 
@@ -99,9 +119,9 @@ model User {
 
   staffPermissions StaffPermission[]
 
-  createdQuotes    Quote[]    @relation("QuoteCreatedBy")
-  requestedQuotes  Quote[]    @relation("QuoteRequestedBy")
-  assignedQuotes   Quote[]    @relation("QuoteAssignedTo")
+  createdQuotes   Quote[] @relation("QuoteCreatedBy")
+  requestedQuotes Quote[] @relation("QuoteRequestedBy")
+  assignedQuotes  Quote[] @relation("QuoteAssignedTo")
 
   createdShipments  Shipment[] @relation("ShipmentCreatedBy")
   assignedShipments Shipment[] @relation("ShipmentAssignedTo")
@@ -153,7 +173,58 @@ model Customer {
   quotes       Quote[]
   shipments    Shipment[]
   documents    Document[]
+  locations    CustomerLocation[]
+  commodities  Commodity[]
   activityLogs ActivityLog[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model CustomerLocation {
+  id String @id @default(cuid())
+
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  nickname    String?
+  companyName String?
+
+  address String
+  city    String
+  state   String
+  zip     String
+  country String @default("US")
+
+  contactName  String?
+  contactPhone String?
+  contactEmail String?
+
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Commodity {
+  id String @id @default(cuid())
+
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  name        String
+  description String?
+
+  freightClass String?
+  nmfc         String?
+  pieceType    PieceType?
+
+  weightLbs Decimal?
+  lengthIn  Decimal?
+  widthIn   Decimal?
+  heightIn  Decimal?
+
+  isActive Boolean @default(true)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -180,7 +251,7 @@ model Quote {
   id          String      @id @default(cuid())
   quoteNumber String      @unique
   serviceType ServiceType
-  status      QuoteStatus @default(REQUESTED)
+  status      QuoteStatus @default(QUOTED)
 
   customerId String
   customer   Customer @relation(fields: [customerId], references: [id])
@@ -209,12 +280,15 @@ model Quote {
   destinationCountry String? @default("US")
 
   pieces       Int?
+  pieceType    PieceType?
   pallets      Int?
   weightLbs    Decimal?
   lengthIn     Decimal?
   widthIn      Decimal?
   heightIn     Decimal?
   freightClass String?
+  nmfc         String?
+  miles        Int?
   description  String?
 
   quotedAmount Decimal?
@@ -222,7 +296,8 @@ model Quote {
   buyRate      Decimal?
   margin       Decimal?
 
-  notes String?
+  notes              String?
+  cancellationReason String?
 
   shipment     Shipment?
   activityLogs ActivityLog[]
@@ -278,9 +353,12 @@ model Shipment {
   destinationCountry String? @default("US")
 
   pieces       Int?
+  pieceType    PieceType?
   pallets      Int?
   weightLbs    Decimal?
   freightClass String?
+  nmfc         String?
+  miles        Int?
   description  String?
 
   sellRate Decimal?
