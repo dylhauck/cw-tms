@@ -155,28 +155,33 @@ export default async function QuotesPage({
                 <div className="flex items-start justify-between gap-6">
                   <div>
                     <div className="flex items-center gap-3">
-  <span
-    className={`block h-4 w-4 shrink-0 rounded-full ${
-      quote.status === "CONVERTED"
-        ? "bg-green-600"
-        : quote.status === "CANCELLED"
-        ? "bg-red-600"
-        : quote.status === "LOST"
-        ? "bg-blue-600"
-        : "bg-black"
-    }`}
+  <div
+    style={{
+      width: "14px",
+      height: "14px",
+      borderRadius: "9999px",
+      backgroundColor:
+        quote.status === "CONVERTED"
+          ? "#16A34A"
+          : quote.status === "CANCELLED"
+          ? "#DC2626"
+          : quote.status === "LOST"
+          ? "#2563EB"
+          : "#111111",
+      flexShrink: 0,
+    }}
   />
 
   <div>
     <h3 className="text-lg font-bold text-[#111111]">
       {quote.quoteNumber}
     </h3>
-                        <p className="mt-1 text-sm text-[#5F6B66]">
-                          {quote.customer.name} ·{" "}
-                          {quote.serviceType.replaceAll("_", " ")}
-                        </p>
-                      </div>
-                    </div>
+
+    <p className="mt-1 text-sm text-[#5F6B66]">
+      {quote.customer.name} · {quote.serviceType.replaceAll("_", " ")}
+    </p>
+  </div>
+</div>
 
                     <p className="mt-4 text-sm text-[#5F6B66]">
                       Contact:{" "}
