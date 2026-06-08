@@ -282,7 +282,7 @@ export async function convertQuoteToShipment(quoteId: string) {
         id: quote.id,
       },
       data: {
-        status: "ACCEPTED",
+        status: "CONVERTED",
       },
     });
 
@@ -290,7 +290,7 @@ export async function convertQuoteToShipment(quoteId: string) {
       data: [
         {
           action: "UPDATED",
-          message: `${session.user.name} accepted quote ${quote.quoteNumber} to shipment.`,
+          message: `${session.user.name} converted quote ${quote.quoteNumber} to shipment.`,
           userId: session.user.id,
           quoteId: quote.id,
           customerId: quote.customerId,
@@ -336,7 +336,7 @@ export async function updateQuoteStatus(quoteId: string, formData: FormData) {
     throw new Error("Cancellation reason is required.");
   }
 
-  if (status === "ACCEPTED") {
+  if (status === "CONVERTED") {
     if (quote.shipment) {
       redirect(`/dashboard/shipments/${quote.shipment.id}`);
     }
@@ -390,7 +390,7 @@ export async function updateQuoteStatus(quoteId: string, formData: FormData) {
       await tx.quote.update({
         where: { id: quote.id },
         data: {
-          status: "ACCEPTED",
+          status: "CONVERTED",
         },
       });
 
@@ -398,7 +398,7 @@ export async function updateQuoteStatus(quoteId: string, formData: FormData) {
         data: [
           {
             action: "STATUS_CHANGED",
-            message: `${session.user.name} accepted quote ${quote.quoteNumber}.`,
+            message: `${session.user.name} converted quote ${quote.quoteNumber}.`,
             userId: session.user.id,
             quoteId: quote.id,
             customerId: quote.customerId,

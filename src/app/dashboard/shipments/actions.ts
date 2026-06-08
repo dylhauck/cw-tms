@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { revalidatePath } from "next/cache";
 
 function cleanValue(value: FormDataEntryValue | null) {
   const stringValue = value?.toString().trim();
@@ -60,5 +61,7 @@ export async function cancelShipment(shipmentId: string, formData: FormData) {
     },
   });
 
-  redirect(`/dashboard/shipments/${shipment.id}`);
+  revalidatePath("/dashboard/shipments");
+  revalidatePath(`/dashboard/shipments/${shipment.id}`);
+  redirect("/dashboard/shipments?status=cancelled");
 }

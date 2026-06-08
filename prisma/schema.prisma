@@ -66,18 +66,13 @@ enum PieceType {
 }
 
 enum QuoteStatus {
-  DRAFT
-  REQUESTED
-  IN_REVIEW
   QUOTED
-  ACCEPTED
-  DECLINED
+  LOST
   CONVERTED
   CANCELLED
 }
 
 enum ShipmentStatus {
-  DRAFT
   BOOKED
   DISPATCHED
   PICKED_UP

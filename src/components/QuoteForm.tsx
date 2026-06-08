@@ -262,42 +262,44 @@ export default function QuoteForm({
   action: (formData: FormData) => void;
   quote?: QuoteFormQuote;
 }) {
-  const [customerId, setCustomerId] = useState("");
-  const [miles, setMiles] = useState("");
+  const [customerId, setCustomerId] = useState(quote?.customerId || "");
+  const [miles, setMiles] = useState(quote?.miles ? String(quote.miles) : "");
 
   const [origin, setOrigin] = useState({
-    name: "",
-    address: "",
-    address2: "",
-    city: "",
-    state: "",
-    zip: "",
-    country: "US",
-  });
+  name: quote?.originName || "",
+  address: quote?.originAddress || "",
+  address2: quote?.originAddress2 || "",
+  city: quote?.originCity || "",
+  state: quote?.originState || "",
+  zip: quote?.originZip || "",
+  country: quote?.originCountry || "US",
+});
 
   const [destination, setDestination] = useState({
-    name: "",
-    address: "",
-    address2: "",
-    city: "",
-    state: "",
-    zip: "",
-    country: "US",
-  });
+  name: quote?.destinationName || "",
+  address: quote?.destinationAddress || "",
+  address2: quote?.destinationAddress2 || "",
+  city: quote?.destinationCity || "",
+  state: quote?.destinationState || "",
+  zip: quote?.destinationZip || "",
+  country: quote?.destinationCountry || "US",
+});
 
-  const [freight, setFreight] = useState<FreightState>({
-    commodity: "",
-    freightClass: "",
-    nmfc: "",
-    pieceType: "",
-    pallets: "",
-    weightLbs: "",
-    lengthIn: "",
-    widthIn: "",
-    heightIn: "",
+  const [freight, setFreight] = useState<FreightState>(
+  calculateDensity({
+    commodity: quote?.description || "",
+    freightClass: quote?.freightClass || "",
+    nmfc: quote?.nmfc || "",
+    pieceType: quote?.pieceType || "",
+    pallets: quote?.pallets ? String(quote.pallets) : "",
+    weightLbs: quote?.weightLbs || "",
+    lengthIn: quote?.lengthIn || "",
+    widthIn: quote?.widthIn || "",
+    heightIn: quote?.heightIn || "",
     cubicFeet: "",
     pcf: "",
-  });
+  })
+);
 
   const selectedCustomer = useMemo(
     () => customers.find((customer) => customer.id === customerId),
@@ -508,9 +510,10 @@ export default function QuoteForm({
             Customer Contact
           </label>
           <select
-            name="requestedById"
-            className="mt-2 w-full rounded-xl border border-[#D8DCD8] px-4 py-3"
-          >
+  name="requestedById"
+  defaultValue={quote?.requestedById || ""}
+  className="mt-2 w-full rounded-xl border border-[#D8DCD8] px-4 py-3"
+>
             <option value="">Select Contact</option>
             {selectedCustomer?.users.map((user) => (
               <option key={user.id} value={user.id}>
@@ -525,9 +528,10 @@ export default function QuoteForm({
             Assigned CW Employee
           </label>
           <select
-            name="assignedToId"
-            className="mt-2 w-full rounded-xl border border-[#D8DCD8] px-4 py-3"
-          >
+  name="assignedToId"
+  defaultValue={quote?.assignedToId || ""}
+  className="mt-2 w-full rounded-xl border border-[#D8DCD8] px-4 py-3"
+>
             <option value="">Unassigned</option>
             {staffUsers.map((user) => (
               <option key={user.id} value={user.id}>
@@ -543,10 +547,11 @@ export default function QuoteForm({
           Service Type
         </label>
         <select
-          name="serviceType"
-          required
-          className="mt-2 w-full rounded-xl border border-[#D8DCD8] px-4 py-3"
-        >
+  name="serviceType"
+  required
+  defaultValue={quote?.serviceType || ""}
+  className="mt-2 w-full rounded-xl border border-[#D8DCD8] px-4 py-3"
+>
           <option value="">Select Service Type</option>
           {serviceTypes.map((type) => (
             <option key={type.value} value={type.value}>
@@ -803,11 +808,12 @@ export default function QuoteForm({
         />
 
         <input
-          name="pieces"
-          type="number"
-          placeholder="Piece Count"
-          className="rounded-xl border border-[#D8DCD8] px-4 py-3"
-        />
+  name="pieces"
+  type="number"
+  defaultValue={quote?.pieces || ""}
+  placeholder="Piece Count"
+  className="rounded-xl border border-[#D8DCD8] px-4 py-3"
+/>
 
         <select
           name="pieceType"
@@ -948,6 +954,7 @@ export default function QuoteForm({
           name="buyRate"
           type="number"
           step="0.01"
+          defaultValue={quote?.buyRate || ""}
           placeholder="Buy Rate"
           className="rounded-xl border border-[#D8DCD8] px-4 py-3"
         />
@@ -956,6 +963,7 @@ export default function QuoteForm({
           name="sellRate"
           type="number"
           step="0.01"
+          defaultValue={quote?.sellRate || ""}
           placeholder="Sell Rate"
           className="rounded-xl border border-[#D8DCD8] px-4 py-3"
         />
@@ -964,6 +972,7 @@ export default function QuoteForm({
       <textarea
         name="notes"
         rows={4}
+        defaultValue={quote?.notes || ""}
         placeholder="Invoice Notes"
         className="rounded-xl border border-[#D8DCD8] px-4 py-3"
       />
@@ -980,7 +989,7 @@ export default function QuoteForm({
           type="submit"
           className="rounded-xl bg-[#0F6B31] px-5 py-3 text-sm font-bold text-white"
         >
-          Save Quote
+          {quote ? "Save Changes" : "Create Quote"}
         </button>
       </div>
     </form>

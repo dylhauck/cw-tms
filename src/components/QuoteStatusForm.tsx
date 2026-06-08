@@ -24,7 +24,7 @@ export default function QuoteStatusForm({
         className="mt-2 w-full rounded-xl border border-[#D8DCD8] px-4 py-3"
       >
         <option value="QUOTED">Quoted</option>
-        <option value="ACCEPTED">Accepted - Convert to Shipment</option>
+        <option value="CONVERTED">Convert to Shipment</option>
         <option value="CANCELLED">Cancelled</option>
       </select>
 

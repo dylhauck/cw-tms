@@ -88,6 +88,22 @@ function AddressCard({
   );
 }
 
+function getQuoteStatusClass(status: string) {
+  switch (status) {
+    case "CONVERTED":
+      return "text-green-600";
+    case "CANCELLED":
+      return "text-red-600";
+    case "LOST":
+      return "text-blue-600";
+    case "IN_REVIEW":
+    case "DISPUTE":
+      return "text-yellow-600";
+    default:
+      return "text-[#111111]";
+  }
+}
+
 export default async function QuoteDetailPage({
   params,
 }: {
@@ -157,12 +173,21 @@ export default async function QuoteDetailPage({
           </p>
         </div>
 
-        <Link
-          href={`/dashboard/quotes/${quote.id}/edit`}
-          className="rounded-xl bg-[#0F6B31] px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#0B5527]"
-        >
-          Edit Quote
-        </Link>
+        {quote.shipment ? (
+  <Link
+    href={`/dashboard/shipments/${quote.shipment.id}`}
+    className="rounded-xl bg-[#0F6B31] px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#0B5527]"
+  >
+    View Shipment
+  </Link>
+) : quote.status !== "CANCELLED" && quote.status !== "CONVERTED" ? (
+  <Link
+    href={`/dashboard/quotes/${quote.id}/edit`}
+    className="rounded-xl bg-[#0F6B31] px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#0B5527]"
+  >
+    Edit Quote
+  </Link>
+) : null}
       </div>
 
       <div className="grid gap-5 xl:grid-cols-4">
@@ -171,9 +196,9 @@ export default async function QuoteDetailPage({
             <p className="text-sm font-medium text-[#5F6B66]">Status</p>
             <FileText size={22} color="#0F6B31" />
           </div>
-          <p className="mt-3 text-2xl font-bold text-[#0F6B31]">
-            {quote.status.replaceAll("_", " ")}
-          </p>
+          <p className={`mt-3 text-2xl font-bold ${getQuoteStatusClass(quote.status)}`}>
+  {quote.status.replaceAll("_", " ")}
+</p>
         </div>
 
         <div className="rounded-2xl border border-[#D8DCD8] bg-white p-6 shadow-sm">
