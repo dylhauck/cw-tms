@@ -1,8 +1,8 @@
 import Image from "next/image";
-import DashboardNav from "@/components/DashboardNav";
 import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
+
 import {
   BadgeDollarSign,
   BarChart3,
@@ -41,47 +41,67 @@ export default async function DashboardLayout({
 
   return (
     <div className="min-h-screen bg-[#F6F8F6] text-[#111111]">
-      <div className="fixed left-0 top-0 z-30 flex h-24 w-64 items-center border-b border-r border-[#D8DCD8] bg-white px-6">
-        <Image
-          src="/cw-logo.png"
-          alt="CW Worldwide logo"
-          width={76}
-          height={76}
-          className="h-auto w-[76px] object-contain"
-          priority
-        />
+      <header className="sticky top-0 z-30 border-b border-[#D8DCD8] bg-white shadow-sm">
+        <div className="flex h-24 items-center justify-between px-8">
+          <div className="flex items-center gap-5">
+            <Image
+              src="/cw-logo.png"
+              alt="CW Worldwide logo"
+              width={76}
+              height={76}
+              className="h-auto w-[76px] object-contain"
+              priority
+            />
 
-        <div className="ml-4">
-          <p className="text-sm font-bold uppercase tracking-[0.22em] text-[#111111]">
-            CW Worldwide
-          </p>
-          <p className="mt-1 text-xl font-bold text-[#1D6A33]">TMS</p>
-        </div>
-      </div>
+            <div>
+              <p className="text-sm font-bold uppercase tracking-[0.22em] text-[#111111]">
+                CW Worldwide
+              </p>
+              <p className="mt-1 text-xl font-bold text-[#1D6A33]">TMS</p>
+            </div>
 
-      <aside className="fixed bottom-0 left-0 top-24 z-20 w-64 bg-[#0F6B31] text-white">
-  <DashboardNav />
-</aside>
+            <div className="ml-6 h-12 border-l border-[#D8DCD8]" />
 
-      <div className="pl-72">
-        <header className="sticky top-0 z-20 flex h-24 items-center justify-between border-b border-[#D8DCD8] bg-white px-8 shadow-sm">
-          <div>
-            <p className="text-lg font-bold text-[#111111]">
-              CW Worldwide Transportation Management System
-            </p>
-            <p className="mt-1 text-sm text-[#5F6B66]">
-              Signed in as {session.user.name} ·{" "}
-              <span className="font-semibold text-[#1D6A33]">
-                {session.user.userType}
-              </span>
-            </p>
+            <div>
+  <p className="text-lg font-bold text-[#111111]">
+    CW Worldwide Transportation Management System
+  </p>
+</div>
           </div>
 
-          <LogoutButton />
-        </header>
+          <div className="flex items-center gap-6">
+  <p className="text-sm text-[#5F6B66]">
+    Signed in as {session.user.name} ·{" "}
+    <span className="font-semibold text-[#1D6A33]">
+      {session.user.userType}
+    </span>
+  </p>
 
-        <main className="p-8">{children}</main>
-      </div>
+  <LogoutButton />
+</div>
+        </div>
+
+        <nav className="border-t border-[#D8DCD8] bg-[#0F6B31] px-8">
+          <div className="flex h-16 items-center justify-center gap-3 overflow-x-auto px-4">
+            {navigation.map((item) => {
+              const Icon = item.icon;
+
+              return (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className="inline-flex shrink-0 items-center gap-2 rounded-xl px-4 py-3 text-sm font-bold text-white transition hover:bg-white/15"
+                >
+                  <Icon size={18} />
+                  {item.name}
+                </Link>
+              );
+            })}
+          </div>
+        </nav>
+      </header>
+
+      <main className="mx-auto max-w-[1600px] p-8">{children}</main>
     </div>
   );
 }

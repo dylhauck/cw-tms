@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { FileText, Plus } from "lucide-react";
-
+import QuoteRowActions from "@/components/QuoteRowActions";
+import { updateQuoteStatus } from "./actions";
 import { prisma } from "@/lib/prisma";
 
 function getQuoteRowStyle(status: string) {
@@ -15,11 +16,33 @@ function getQuoteRowStyle(status: string) {
       return { backgroundColor: "#FEF2F2" };
 
     case "LOST":
-      return { backgroundColor: "#EFF6FF" };
+      return { backgroundColor: "#eed77dfd" };
 
     default:
       return { backgroundColor: "#FFFFFF" };
   }
+}
+
+function getQuoteDotColor(status: string) {
+  switch (status) {
+    case "CONVERTED":
+      return "#16A34A";
+
+    case "CANCELLED":
+      return "#DC2626";
+
+    case "LOST":
+      return "#92400E";
+
+    default:
+      return "#111111";
+  }
+}
+
+function formatDate(value: Date | null) {
+  if (!value) return "Not set";
+
+  return value.toLocaleDateString();
 }
 
 export default async function QuotesPage({
@@ -34,12 +57,18 @@ export default async function QuotesPage({
     where:
       statusFilter === "converted"
         ? { status: "CONVERTED" }
+        : statusFilter === "lost"
+        ? { status: "LOST" }
         : statusFilter === "cancelled"
         ? { status: "CANCELLED" }
         : statusFilter === "all"
         ? {}
         : {
-            NOT: [{ status: "CANCELLED" }, { status: "CONVERTED" }],
+            NOT: [
+              { status: "CANCELLED" },
+              { status: "CONVERTED" },
+              { status: "LOST" },
+            ],
           },
     orderBy: {
       createdAt: "desc",
@@ -48,7 +77,11 @@ export default async function QuotesPage({
       customer: true,
       requestedBy: true,
       assignedTo: true,
-      shipment: true,
+      shipment: {
+        include: {
+          carrier: true,
+        },
+      },
     },
   });
 
@@ -76,7 +109,7 @@ export default async function QuotesPage({
         </Link>
       </div>
 
-      <div className="mb-5 flex items-center gap-3">
+      <div className="mb-8 flex items-center gap-4">
         <Link
           href="/dashboard/quotes"
           className={`rounded-xl px-4 py-2 text-sm font-bold ${
@@ -97,6 +130,17 @@ export default async function QuotesPage({
           }`}
         >
           Converted
+        </Link>
+
+        <Link
+          href="/dashboard/quotes?status=lost"
+          className={`rounded-xl px-4 py-2 text-sm font-bold ${
+            statusFilter === "lost"
+              ? "bg-[#0F6B31] text-white"
+              : "border border-[#D8DCD8] bg-white text-[#111111]"
+          }`}
+        >
+          Lost
         </Link>
 
         <Link
@@ -127,6 +171,8 @@ export default async function QuotesPage({
           <h2 className="text-xl font-bold text-[#111111]">
             {statusFilter === "converted"
               ? "Converted Quotes"
+              : statusFilter === "lost"
+              ? "Lost Quotes"
               : statusFilter === "cancelled"
               ? "Cancelled Quotes"
               : statusFilter === "all"
@@ -140,84 +186,209 @@ export default async function QuotesPage({
         </div>
 
         {quotes.length ? (
-          <div className="divide-y divide-[#D8DCD8]">
+          <div className="divide-y divide-[#C9D0C9]">
             {quotes.map((quote) => (
-              <Link
-  key={quote.id}
-  href={
-    quote.shipment
-      ? `/dashboard/shipments/${quote.shipment.id}`
-      : `/dashboard/quotes/${quote.id}`
-  }
-  style={getQuoteRowStyle(quote.status)}
-  className="block px-6 py-5 transition"
->
+              <div
+                key={quote.id}
+                style={getQuoteRowStyle(quote.status)}
+                className="border-b border-[#BFD8C8] px-6 py-7 last:border-b-0"
+              >
                 <div className="flex items-start justify-between gap-6">
-                  <div>
+                  <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-3">
-  <div
-    style={{
-      width: "14px",
-      height: "14px",
-      borderRadius: "9999px",
-      backgroundColor:
-        quote.status === "CONVERTED"
-          ? "#16A34A"
-          : quote.status === "CANCELLED"
-          ? "#DC2626"
-          : quote.status === "LOST"
-          ? "#2563EB"
-          : "#111111",
-      flexShrink: 0,
-    }}
-  />
+                      <div
+                        style={{
+                          width: "14px",
+                          height: "14px",
+                          borderRadius: "9999px",
+                          backgroundColor: getQuoteDotColor(quote.status),
+                          flexShrink: 0,
+                        }}
+                      />
 
-  <div>
-    <h3 className="text-lg font-bold text-[#111111]">
-      {quote.quoteNumber}
-    </h3>
+                      <div>
+                        <h3 className="text-lg font-bold text-[#111111]">
+                          {quote.quoteNumber}
+                        </h3>
 
-    <p className="mt-1 text-sm text-[#5F6B66]">
-      {quote.customer.name} · {quote.serviceType.replaceAll("_", " ")}
-    </p>
-  </div>
-</div>
+                        <p className="mt-1 text-sm text-[#5F6B66]">
+                          {quote.customer.name} ·{" "}
+                          {quote.serviceType.replaceAll("_", " ")}
+                        </p>
+                      </div>
+                    </div>
 
-                    <p className="mt-4 text-sm text-[#5F6B66]">
-                      Contact:{" "}
-                      {quote.requestedBy
-                        ? `${quote.requestedBy.firstName} ${quote.requestedBy.lastName}`
-                        : "Not set"}
-                    </p>
+                    <div className="mt-4 grid gap-1 text-sm text-[#5F6B66]">
+                      <p>
+                        Contact:{" "}
+                        {quote.requestedBy
+                          ? `${quote.requestedBy.firstName} ${quote.requestedBy.lastName}`
+                          : "Not set"}
+                      </p>
 
-                    <p className="mt-1 text-sm text-[#5F6B66]">
-                      Assigned:{" "}
-                      {quote.assignedTo
-                        ? `${quote.assignedTo.firstName} ${quote.assignedTo.lastName}`
-                        : "Unassigned"}
-                    </p>
+                      <p>
+                        Assigned:{" "}
+                        {quote.assignedTo
+                          ? `${quote.assignedTo.firstName} ${quote.assignedTo.lastName}`
+                          : "Unassigned"}
+                      </p>
+                    </div>
+
+                    <div className="mt-5">
+                      <div
+                        className="gap-4 text-sm text-[#5F6B66]"
+                        style={{
+                          display: "grid",
+                          gridTemplateColumns:
+                            "repeat(6, minmax(180px, 1fr))",
+                          alignItems: "start",
+                        }}
+                      >
+                        <div>
+                          <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#111111]">
+                            Pickup Date
+                          </p>
+                          <p className="mt-1">
+                            {quote.shipment
+                              ? formatDate(quote.shipment.pickupDate)
+                              : "Not set"}
+                          </p>
+
+                          <p className="mt-4 text-xs font-bold uppercase tracking-[0.12em] text-[#111111]">
+                            Pickup
+                          </p>
+                          <p className="mt-1">
+                            {quote.shipment
+                              ? `${quote.shipment.originAddress}, ${quote.shipment.originCity}, ${quote.shipment.originState} ${quote.shipment.originZip}`
+                              : `${quote.originAddress || "Not set"}, ${
+                                  quote.originCity || ""
+                                }, ${quote.originState || ""} ${
+                                  quote.originZip || ""
+                                }`}
+                          </p>
+                        </div>
+
+                        <div>
+                          <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#111111]">
+                            Delivery Date
+                          </p>
+                          <p className="mt-1">
+                            {quote.shipment
+                              ? formatDate(quote.shipment.deliveryDate)
+                              : "Not set"}
+                          </p>
+
+                          <p className="mt-4 text-xs font-bold uppercase tracking-[0.12em] text-[#111111]">
+                            Delivery
+                          </p>
+                          <p className="mt-1">
+                            {quote.shipment
+                              ? `${quote.shipment.destinationAddress}, ${quote.shipment.destinationCity}, ${quote.shipment.destinationState} ${quote.shipment.destinationZip}`
+                              : `${quote.destinationAddress || "Not set"}, ${
+                                  quote.destinationCity || ""
+                                }, ${quote.destinationState || ""} ${
+                                  quote.destinationZip || ""
+                                }`}
+                          </p>
+                        </div>
+
+                        <div>
+                          <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#111111]">
+                            Pallets
+                          </p>
+                          <p className="mt-1">
+                            {quote.shipment?.pallets ??
+                              quote.pallets ??
+                              "Not set"}
+                          </p>
+
+                          <p className="mt-4 text-xs font-bold uppercase tracking-[0.12em] text-[#111111]">
+                            Weight
+                          </p>
+                          <p className="mt-1">
+                            {quote.shipment?.weightLbs
+                              ? `${quote.shipment.weightLbs.toString()} lbs`
+                              : quote.weightLbs
+                              ? `${quote.weightLbs.toString()} lbs`
+                              : "Not set"}
+                          </p>
+                        </div>
+
+                        <div>
+                          <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#111111]">
+                            Pieces
+                          </p>
+                          <p className="mt-1">
+                            {quote.shipment?.pieces ??
+                              quote.pieces ??
+                              "Not set"}
+                          </p>
+
+                          <p className="mt-4 text-xs font-bold uppercase tracking-[0.12em] text-[#111111]">
+                            Commodity
+                          </p>
+                          <p className="mt-1">
+                            {quote.shipment?.description ||
+                              quote.description ||
+                              "Not set"}
+                          </p>
+                        </div>
+
+                        <div>
+                          <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#111111]">
+                            Declared Value
+                          </p>
+                          <p className="mt-1">Not set</p>
+
+                          <p className="mt-4 text-xs font-bold uppercase tracking-[0.12em] text-[#111111]">
+                            Carrier
+                          </p>
+                          <p className="mt-1">
+                            {quote.shipment?.carrier?.name || "Unassigned"}
+                          </p>
+                        </div>
+
+                        <div>
+                          <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#111111]">
+                            Buy Rate
+                          </p>
+                          <p className="mt-1">
+                            {quote.shipment?.buyRate
+                              ? `$${quote.shipment.buyRate.toString()}`
+                              : quote.buyRate
+                              ? `$${quote.buyRate.toString()}`
+                              : "$0"}
+                          </p>
+
+                          <p className="mt-4 text-xs font-bold uppercase tracking-[0.12em] text-[#111111]">
+                            Sell Rate
+                          </p>
+                          <p className="mt-1">
+                            {quote.shipment?.sellRate
+                              ? `$${quote.shipment.sellRate.toString()}`
+                              : quote.sellRate
+                              ? `$${quote.sellRate.toString()}`
+                              : "$0"}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="text-right">
+                  <div className="flex shrink-0 flex-col items-end gap-3">
                     <p className="text-sm font-bold uppercase tracking-[0.12em] text-[#111111]">
                       {quote.status.replaceAll("_", " ")}
                     </p>
 
-                    <div className="mt-3">
-                      {quote.shipment ? (
-                        <span className="inline-flex rounded-xl bg-[#0F6B31] px-4 py-2 text-sm font-bold text-white">
-                          View Shipment
-                        </span>
-                      ) : quote.status !== "CANCELLED" &&
-                        quote.status !== "CONVERTED" ? (
-                        <span className="inline-flex rounded-xl bg-[#0F6B31] px-4 py-2 text-sm font-bold text-white">
-                          Edit Quote
-                        </span>
-                      ) : null}
+                      <QuoteRowActions
+  quoteId={quote.id}
+  shipmentId={quote.shipment?.id || null}
+  status={quote.status}
+  action={updateQuoteStatus.bind(null, quote.id)}
+/>
                     </div>
                   </div>
                 </div>
-              </Link>
             ))}
           </div>
         ) : (

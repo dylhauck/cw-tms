@@ -316,6 +316,7 @@ export async function updateQuoteStatus(quoteId: string, formData: FormData) {
 
   const status = cleanValue(formData.get("status"));
   const cancellationReason = cleanValue(formData.get("cancellationReason"));
+  const lostRate = cleanDecimal(formData.get("lostRate"));
 
   if (!status) {
     throw new Error("Status is required.");
@@ -334,6 +335,10 @@ export async function updateQuoteStatus(quoteId: string, formData: FormData) {
 
   if (status === "CANCELLED" && !cancellationReason) {
     throw new Error("Cancellation reason is required.");
+  }
+
+  if (status === "LOST" && !lostRate) {
+    throw new Error("Rate lost to is required.");
   }
 
   if (status === "CONVERTED") {
@@ -422,7 +427,8 @@ export async function updateQuoteStatus(quoteId: string, formData: FormData) {
   await prisma.quote.update({
     where: { id: quote.id },
     data: {
-      status: status as "QUOTED" | "CANCELLED",
+      status: status as "QUOTED" | "LOST" | "CANCELLED",
+      lostRate: status === "LOST" ? lostRate : null,
       cancellationReason: status === "CANCELLED" ? cancellationReason : null,
       activityLogs: {
         create: {
@@ -430,6 +436,8 @@ export async function updateQuoteStatus(quoteId: string, formData: FormData) {
           message:
             status === "CANCELLED"
               ? `${session.user.name} cancelled quote ${quote.quoteNumber}. Reason: ${cancellationReason}`
+              : status === "LOST"
+              ? `${session.user.name} marked quote ${quote.quoteNumber} as lost. Rate lost to: $${lostRate}`
               : `${session.user.name} changed quote ${quote.quoteNumber} status to ${status}.`,
           userId: session.user.id,
           customerId: quote.customerId,

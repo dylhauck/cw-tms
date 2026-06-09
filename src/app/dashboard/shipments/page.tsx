@@ -3,6 +3,64 @@ import { Package } from "lucide-react";
 
 import { prisma } from "@/lib/prisma";
 
+function getShipmentRowStyle(status: string) {
+  switch (status) {
+    case "BOOKED":
+      return { backgroundColor: "#F6F8F6" };
+
+    case "DISPATCHED":
+      return { backgroundColor: "#EFF6FF" };
+
+    case "PICKED_UP":
+    case "IN_TRANSIT":
+    case "OUT_FOR_DELIVERY":
+      return { backgroundColor: "#ECFDF3" };
+
+    case "DELIVERED":
+      return { backgroundColor: "#F0FDF4" };
+
+    case "EXCEPTION":
+      return { backgroundColor: "#FEFCE8" };
+
+    case "CANCELLED":
+      return { backgroundColor: "#FEF2F2" };
+
+    default:
+      return { backgroundColor: "#FFFFFF" };
+  }
+}
+
+function getShipmentDotColor(status: string) {
+  switch (status) {
+    case "BOOKED":
+      return "#111111";
+
+    case "DISPATCHED":
+      return "#2563EB";
+
+    case "PICKED_UP":
+    case "IN_TRANSIT":
+    case "OUT_FOR_DELIVERY":
+    case "DELIVERED":
+      return "#16A34A";
+
+    case "EXCEPTION":
+      return "#CA8A04";
+
+    case "CANCELLED":
+      return "#DC2626";
+
+    default:
+      return "#111111";
+  }
+}
+
+function formatDate(value: Date | null) {
+  if (!value) return "Not set";
+
+  return value.toLocaleDateString();
+}
+
 export default async function ShipmentsPage({
   searchParams,
 }: {
@@ -52,7 +110,7 @@ export default async function ShipmentsPage({
         </p>
       </div>
 
-      <div className="mb-5 flex items-center gap-3">
+      <div className="mb-8 flex items-center gap-4">
         <Link
           href="/dashboard/shipments"
           className={`rounded-xl px-4 py-2 text-sm font-bold ${
@@ -103,19 +161,27 @@ export default async function ShipmentsPage({
         </div>
 
         {shipments.length ? (
-          <div className="divide-y divide-[#D8DCD8]">
+          <div className="divide-y divide-[#C9D0C9]">
             {shipments.map((shipment) => (
-              <Link
+              <div
                 key={shipment.id}
-                href={`/dashboard/shipments/${shipment.id}`}
-                className="block px-6 py-5 transition hover:bg-[#F6F8F6]"
+                style={getShipmentRowStyle(shipment.status)}
+                className="border-b border-[#BFD8C8] px-6 py-7 last:border-b-0"
               >
                 <div className="flex items-start justify-between gap-6">
-                  <div>
+                  <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-3">
-                      <div className="rounded-full bg-[#EEF7F1] p-3">
-                        <Package size={22} color="#0F6B31" />
-                      </div>
+                      <div
+                        style={{
+                          width: "14px",
+                          height: "14px",
+                          borderRadius: "9999px",
+                          backgroundColor: getShipmentDotColor(
+                            shipment.status
+                          ),
+                          flexShrink: 0,
+                        }}
+                      />
 
                       <div>
                         <h3 className="text-lg font-bold text-[#111111]">
@@ -129,35 +195,151 @@ export default async function ShipmentsPage({
                       </div>
                     </div>
 
-                    <p className="mt-4 text-sm text-[#5F6B66]">
-                      Carrier: {shipment.carrier?.name || "Not assigned"}
-                    </p>
+                    <div className="mt-4 grid gap-1 text-sm text-[#5F6B66]">
+                      <p>
+                        Carrier: {shipment.carrier?.name || "Not assigned"}
+                      </p>
 
-                    <p className="mt-1 text-sm text-[#5F6B66]">
-                      Assigned:{" "}
-                      {shipment.assignedTo
-                        ? `${shipment.assignedTo.firstName} ${shipment.assignedTo.lastName}`
-                        : "Unassigned"}
-                    </p>
+                      <p>
+                        Assigned:{" "}
+                        {shipment.assignedTo
+                          ? `${shipment.assignedTo.firstName} ${shipment.assignedTo.lastName}`
+                          : "Unassigned"}
+                      </p>
+                    </div>
+
+                    <div className="mt-5">
+                      <div
+                        className="gap-4 text-sm text-[#5F6B66]"
+                        style={{
+                          display: "grid",
+                          gridTemplateColumns:
+                            "repeat(6, minmax(180px, 1fr))",
+                          alignItems: "start",
+                        }}
+                      >
+                        <div>
+                          <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#111111]">
+                            Pickup Date
+                          </p>
+                          <p className="mt-1">
+                            {formatDate(shipment.pickupDate)}
+                          </p>
+
+                          <p className="mt-4 text-xs font-bold uppercase tracking-[0.12em] text-[#111111]">
+                            Pickup
+                          </p>
+                          <p className="mt-1">
+                            {shipment.originAddress},{" "}
+                            {shipment.originCity},{" "}
+                            {shipment.originState} {shipment.originZip}
+                          </p>
+                        </div>
+
+                        <div>
+                          <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#111111]">
+                            Delivery Date
+                          </p>
+                          <p className="mt-1">
+                            {formatDate(shipment.deliveryDate)}
+                          </p>
+
+                          <p className="mt-4 text-xs font-bold uppercase tracking-[0.12em] text-[#111111]">
+                            Delivery
+                          </p>
+                          <p className="mt-1">
+                            {shipment.destinationAddress},{" "}
+                            {shipment.destinationCity},{" "}
+                            {shipment.destinationState}{" "}
+                            {shipment.destinationZip}
+                          </p>
+                        </div>
+
+                        <div>
+                          <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#111111]">
+                            Pallets
+                          </p>
+                          <p className="mt-1">
+                            {shipment.pallets ?? "Not set"}
+                          </p>
+
+                          <p className="mt-4 text-xs font-bold uppercase tracking-[0.12em] text-[#111111]">
+                            Weight
+                          </p>
+                          <p className="mt-1">
+                            {shipment.weightLbs
+                              ? `${shipment.weightLbs.toString()} lbs`
+                              : "Not set"}
+                          </p>
+                        </div>
+
+                        <div>
+                          <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#111111]">
+                            Pieces
+                          </p>
+                          <p className="mt-1">
+                            {shipment.pieces ?? "Not set"}
+                          </p>
+
+                          <p className="mt-4 text-xs font-bold uppercase tracking-[0.12em] text-[#111111]">
+                            Commodity
+                          </p>
+                          <p className="mt-1">
+                            {shipment.description || "Not set"}
+                          </p>
+                        </div>
+
+                        <div>
+                          <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#111111]">
+                            Declared Value
+                          </p>
+                          <p className="mt-1">Not set</p>
+
+                          <p className="mt-4 text-xs font-bold uppercase tracking-[0.12em] text-[#111111]">
+                            From Quote
+                          </p>
+                          <p className="mt-1">
+                            {shipment.quote?.quoteNumber || "N/A"}
+                          </p>
+                        </div>
+
+                        <div>
+                          <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#111111]">
+                            Buy Rate
+                          </p>
+                          <p className="mt-1">
+                            {shipment.buyRate
+                              ? `$${shipment.buyRate.toString()}`
+                              : "$0"}
+                          </p>
+
+                          <p className="mt-4 text-xs font-bold uppercase tracking-[0.12em] text-[#111111]">
+                            Sell Rate
+                          </p>
+                          <p className="mt-1">
+                            {shipment.sellRate
+                              ? `$${shipment.sellRate.toString()}`
+                              : "$0"}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="text-right">
-                    <p
-                      className={`text-sm font-bold uppercase tracking-[0.12em] ${
-                        shipment.status === "CANCELLED"
-                          ? "text-red-600"
-                          : "text-[#0F6B31]"
-                      }`}
-                    >
+                  <div className="flex shrink-0 flex-col items-end gap-3">
+                    <p className="text-sm font-bold uppercase tracking-[0.12em] text-[#111111]">
                       {shipment.status.replaceAll("_", " ")}
                     </p>
 
-                    <p className="mt-3 text-sm text-[#5F6B66]">
-                      From Quote: {shipment.quote?.quoteNumber || "N/A"}
-                    </p>
+                    <Link
+                      href={`/dashboard/shipments/${shipment.id}`}
+                      className="inline-flex rounded-xl bg-[#0F6B31] px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#0B5527]"
+                    >
+                      View Shipment
+                    </Link>
                   </div>
                 </div>
-              </Link>
+              </div>
             ))}
           </div>
         ) : (

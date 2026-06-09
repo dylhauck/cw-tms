@@ -80,7 +80,6 @@ enum ShipmentStatus {
   OUT_FOR_DELIVERY
   DELIVERED
   CANCELLED
-  EXCEPTION
 }
 
 enum DocumentType {
@@ -308,6 +307,8 @@ model Quote {
 
   notes              String?
   cancellationReason String?
+
+  lostRate Decimal?
 
   shipment     Shipment?
   activityLogs ActivityLog[]
